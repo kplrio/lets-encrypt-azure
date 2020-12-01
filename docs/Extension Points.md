@@ -50,4 +50,4 @@ Here are some pointers on where you can drop extensions to cover more than the A
 # New Service Implementation 
   
   
-After reviewing the prior files and ensuring you understand all of it, start by implementing you're `AzureApiGatewayClient` in the same area as the others. Then add an additional switch to the functions. Addd your 'AzApiGateway' definition to the existing switch case in the `RenewalOptionParser.ParseTargetResource` method. 
+After reviewing the prior files and ensuring you understand all of it, start by implementing you're `AzureApiGatewayServiceClient` in the same area as the others. Implement a new target resource object that implements the `IResource` interface, this will contain the business logic behind deciding whether to issue a new a certificate. Finally, add your 'AzApiGateway' switch case in the `RenewalOptionParser.ParseTargetResource` method which handles the instantiation of your new target resource object. 
