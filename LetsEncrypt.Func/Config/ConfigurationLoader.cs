@@ -19,7 +19,7 @@ namespace LetsEncrypt.Func.Config
         public ConfigurationLoader(
             IStorageProvider storageProvider,
             IConfigurationProcessor configurationProcessor,
-            ILogger<ConfigurationLoader> logger)
+            ILogger logger)
         {
             _storageProvider = storageProvider;
             _configurationProcessor = configurationProcessor;
@@ -48,13 +48,15 @@ namespace LetsEncrypt.Func.Config
                     _logger.LogError(e, "Failed to process configuration file " + path);
                 }
             }
+
             if (!paths.Any())
             {
                 _logger.LogWarning("No config files found. Placing config/sample.json in storage!");
-                string sampleJsonPath = Path.Combine(executionContext.FunctionAppDirectory, "sample.json");
+                var sampleJsonPath = Path.Combine(executionContext.FunctionAppDirectory, "sample.json");
                 var content = await File.ReadAllTextAsync(sampleJsonPath, cancellationToken);
                 await _storageProvider.SetAsync("config/sample.json", content, cancellationToken);
             }
+
             return configs.ToArray();
         }
     }

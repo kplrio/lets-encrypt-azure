@@ -144,42 +144,42 @@ namespace LetsEncrypt.Logic.Config
             }
         }
 
-        public ITargetResource ParseTargetResource(CertificateRenewalOptions cfg)
+        public ITargetResource ParseTargetResource(CertificateRenewalOptions certRenewalOpts)
         {
-            switch (cfg.TargetResource.Type.ToLowerInvariant())
+            switch (certRenewalOpts.TargetResource.Type.ToLowerInvariant())
             {
                 case "cdn":
                     {
-                        var props = cfg.TargetResource.Properties == null
+                        var cdnProps = certRenewalOpts.TargetResource.Properties == null
                             ? new CdnProperties
                             {
-                                Endpoints = new[] { cfg.TargetResource.Name },
-                                Name = cfg.TargetResource.Name,
-                                ResourceGroupName = cfg.TargetResource.Name
+                                Endpoints = new[] { certRenewalOpts.TargetResource.Name },
+                                Name = certRenewalOpts.TargetResource.Name,
+                                ResourceGroupName = certRenewalOpts.TargetResource.Name
                             }
-                            : cfg.TargetResource.Properties.ToObject<CdnProperties>();
+                            : certRenewalOpts.TargetResource.Properties.ToObject<CdnProperties>();
 
-                        if (string.IsNullOrEmpty(props.Name))
-                            throw new ArgumentException($"CDN section is missing required property {nameof(props.Name)}");
+                        if (string.IsNullOrEmpty(cdnProps.Name))
+                            throw new ArgumentException($"CDN section is missing required property {nameof(cdnProps.Name)}");
 
-                        var rg = props.ResourceGroupName;
-                        if (string.IsNullOrEmpty(rg))
-                            rg = props.Name;
-                        var endpoints = props.Endpoints;
-                        if (endpoints.IsNullOrEmpty())
-                            endpoints = new[] { props.Name };
+                        var propsResourceGroupName = cdnProps.ResourceGroupName;
+                        if (string.IsNullOrEmpty(propsResourceGroupName))
+                            throw new ArgumentNullException(nameof(certRenewalOpts.TargetResource));
 
-                        return new CdnTargetResoure(_azureCdnClient, rg, props.Name, endpoints, _loggerFactory.CreateLogger<CdnTargetResoure>());
+                        if (cdnProps.Endpoints.IsNullOrEmpty())
+                            cdnProps.Endpoints = new[] { cdnProps.Name };
+
+                        return new CdnTargetResoure(_azureCdnClient, propsResourceGroupName, cdnProps.Name, cdnProps.Endpoints, _loggerFactory.CreateLogger<CdnTargetResoure>());
                     }
                 case "appservice":
                     {
-                        var props = cfg.TargetResource.Properties == null
+                        var props = certRenewalOpts.TargetResource.Properties == null
                             ? new AppServiceProperties
                             {
-                                Name = cfg.TargetResource.Name,
-                                ResourceGroupName = cfg.TargetResource.Name
+                                Name = certRenewalOpts.TargetResource.Name,
+                                ResourceGroupName = certRenewalOpts.TargetResource.Name
                             }
-                            : cfg.TargetResource.Properties.ToObject<AppServiceProperties>();
+                            : certRenewalOpts.TargetResource.Properties.ToObject<AppServiceProperties>();
 
                         if (string.IsNullOrEmpty(props.Name))
                             throw new ArgumentException($"AppService section is missing required property {nameof(props.Name)}");
@@ -190,8 +190,13 @@ namespace LetsEncrypt.Logic.Config
 
                         return new AppServiceTargetResoure(_azureAppServiceClient, rg, props.Name, _loggerFactory.CreateLogger<AppServiceTargetResoure>());
                     }
+                case "apigateway":
+                {
+                    throw new NotImplementedException();
+                        break;
+                    }
                 default:
-                    throw new NotImplementedException(cfg.TargetResource.Type);
+                    throw new NotImplementedException(certRenewalOpts.TargetResource.Type);
             }
         }
 

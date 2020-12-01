@@ -27,9 +27,9 @@ namespace LetsEncrypt.Logic.Config
         /// <summary>
         /// Given a configuration object parses the target resource section based on its type and returns a statically typed version.
         /// </summary>
-        /// <param name="cfg"></param>
+        /// <param name="certRenewalOpts"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ITargetResource ParseTargetResource(CertificateRenewalOptions cfg);
+        ITargetResource ParseTargetResource(CertificateRenewalOptions certRenewalOpts);
     }
 }

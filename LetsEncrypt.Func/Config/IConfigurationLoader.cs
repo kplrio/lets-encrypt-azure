@@ -7,6 +7,6 @@ namespace LetsEncrypt.Func.Config
 {
     public interface IConfigurationLoader
     {
-        Task<IEnumerable<(string configName, Configuration)>> LoadConfigFilesAsync(Microsoft.Azure.WebJobs.ExecutionContext executionContext, CancellationToken cancellationToken);
+        Task<IEnumerable<(string configName, Configuration config)>> LoadConfigFilesAsync(Microsoft.Azure.WebJobs.ExecutionContext executionContext, CancellationToken cancellationToken);
     }
 }

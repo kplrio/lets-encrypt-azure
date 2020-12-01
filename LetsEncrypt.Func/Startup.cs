@@ -6,6 +6,14 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Net.Http;
+using Apimanagement;
+using Apimanagement.Models;
+using LetsEncrypt.Func.Config;
+using Microsoft.Extensions.Http;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace LetsEncrypt.Func
@@ -22,14 +30,14 @@ namespace LetsEncrypt.Func
             builder.Services.AddSingleton<IKeyVaultClient>(keyVaultClient);
 
             builder.Services.Scan(scan =>
-            scan.FromAssemblyOf<RenewalService>()
-                .AddClasses()
-                .AsMatchingInterface()
-                .WithTransientLifetime()
-                .FromAssemblyOf<Startup>()
-                .AddClasses()
-                .AsMatchingInterface()
-                .WithTransientLifetime());
+                scan.FromAssemblyOf<RenewalService>()
+                    .AddClasses()
+                    .AsMatchingInterface()
+                    .WithTransientLifetime()
+                    .FromAssemblyOf<Startup>()
+                    .AddClasses()
+                    .AsMatchingInterface()
+                    .WithTransientLifetime());
         }
     }
 }

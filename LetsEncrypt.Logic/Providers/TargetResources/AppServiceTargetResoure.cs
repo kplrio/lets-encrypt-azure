@@ -8,8 +8,26 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace LetsEncrypt.Logic.Providers.TargetResources
 {
+    public class APIGatewayTargetResource : ITargetResource
+    {
+
+
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public bool SupportsCertificateCheck { get; set; }
+        public async Task UpdateAsync(ICertificate cert, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> IsUsingCertificateAsync(ICertificate cert, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class AppServiceTargetResoure : ITargetResource
     {
         private readonly string _resourceGroupName;
@@ -27,6 +45,8 @@ namespace LetsEncrypt.Logic.Providers.TargetResources
             Name = name ?? throw new ArgumentNullException(nameof(name));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
+
 
         public string Name { get; }
 

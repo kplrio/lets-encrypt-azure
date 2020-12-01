@@ -34,33 +34,33 @@ namespace LetsEncrypt.Logic
 
         public async Task<RenewalResult> RenewCertificateAsync(
             IAcmeOptions options,
-            CertificateRenewalOptions cfg,
+            CertificateRenewalOptions certRenewalOpts,
             CancellationToken cancellationToken)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
-            if (cfg == null)
-                throw new ArgumentNullException(nameof(cfg));
+            if (certRenewalOpts == null)
+                throw new ArgumentNullException(nameof(certRenewalOpts));
 
-            var hostNames = string.Join(";", cfg.HostNames);
+            var hostNames = string.Join(";", certRenewalOpts.HostNames);
             _logger.LogInformation($"Working on certificate for: {hostNames}");
 
             // 1. check if valid cert exists
-            var cert = await GetExistingCertificateAsync(options, cfg, cancellationToken);
+            var cert = await GetExistingCertificateAsync(options, certRenewalOpts, cancellationToken);
 
             bool updateResource = false;
             if (cert == null)
             {
                 // 2. run Let's Encrypt challenge as cert either doesn't exist or is expired
                 _logger.LogInformation($"Issuing a new certificate for {hostNames}");
-                var order = await ValidateOrderAsync(options, cfg, cancellationToken);
+                var order = await ValidateOrderAsync(options, certRenewalOpts, cancellationToken);
 
                 // 3. save certificate
-                cert = await GenerateAndStoreCertificateAsync(order, cfg, cancellationToken);
+                cert = await GenerateAndStoreCertificateAsync(order, certRenewalOpts, cancellationToken);
                 updateResource = true;
             }
 
-            var resource = _renewalOptionParser.ParseTargetResource(cfg);
+            var resource = _renewalOptionParser.ParseTargetResource(certRenewalOpts);
             // if no update is required still check with target resource
             // and only skip if latest cert is already used
             // this helps if cert issuance worked but resource updated failed
@@ -100,7 +100,7 @@ namespace LetsEncrypt.Logic
                 _logger.LogWarning($"Override '{nameof(cfg.Overrides.NewCertificate)}' is enabled, forcing certificate renewal.");
                 return null;
             }
-
+            
             var certStore = _renewalOptionParser.ParseCertificateStore(cfg);
 
             // determine if renewal is needed based on existing cert
@@ -146,8 +146,8 @@ namespace LetsEncrypt.Logic
             CertificateRenewalOptions cfg,
             CancellationToken cancellationToken)
         {
-            var authenticationContext = await _authenticationService.AuthenticateAsync(options, cancellationToken);
-            var order = await authenticationContext.AcmeContext.NewOrder(cfg.HostNames);
+            var acmeAuthContext = await _authenticationService.AuthenticateAsync(options, cancellationToken);
+            var order = await acmeAuthContext.AcmeContext.NewOrder(cfg.HostNames);
 
             var challenge = await _renewalOptionParser.ParseChallengeResponderAsync(cfg, cancellationToken);
 
