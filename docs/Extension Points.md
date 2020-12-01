@@ -28,4 +28,21 @@ Here are some pointers on where you can drop extensions to cover more than the A
   - `bool SupportsCertificateCheck { get; }` - this is typical MS style design `SupportsXXXXX` is littered all over the place. If it didn't support certificate checks, we would not be using this to automate it. So this may require a concrete definition, but it'll simply be return the value of `true`
   - `Task<bool> IsUsingCertificateAsync(ICertificate cert, CancellationToken cancellationToken);` - A check to see if the target resource already has a certificate, or needs a new one.
   - `Task UpdateAsync(ICertificate cert, CancellationToken cancellationToken);` A method to add/update the certificate on the target resource. Though the name implies updating only, this is where you also define the initial creation.
-- 
+- `AppServiceTargetResource` in the same namespace is a good reference for how to build out a new certificate driver/provider. It's well documented in the areas it needs to be with comments. It also shares logic with many other API web style services with TLS certficate support. For example this particular block is necessary for API gateways as well: 
+
+    ```csharp
+     // app service has one entry per domain, but we could have one cert that matched all
+     var matched = response.CustomDomains.Where(x => cert.Thumbprint.Equals(x.Thumbprint, StringComparison.OrdinalIgnoreCase))
+    ```
+
+    Followed by a comparison to the host name in the return block:
+
+    ```csharp
+    // verify that the cert covers all matching entries
+    return matched.All(x => cert.HostNames.Contains(x.HostName, StringComparison.OrdinalIgnoreCase));
+    ```
+  - This makes use of an `IAzureAppServiceClient` that is manually defined in the `LetsEncrypt.Logic.Azure` namespace. If not using AutoRest, you'll need to define one for your service as well.
+  - If using AutoRest, create an `Azure[TargetServiceType]Client` as just a simple wrapper around the generated classes. Doing so follows the existing pattern, and will reduce merge conflicts from the upstream repositories.
+
+
+
