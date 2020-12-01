@@ -24,7 +24,7 @@ Here are some pointers on where you can drop extensions to cover more than the A
 ```
 
   - A config set up as such with the existing codebase will cover the prior elements. Leaving you with only a couple pieces to implement.
-- `ITargetResource` is next up. It's an interface with only a few very generic definitions requring only three concrete implementations, and two definitions that are essentially reflections of configuration values:
+- `ITargetResource` in the `LetsEncrypt.Logic.Providers.TargetResources` namespace is next up. It's an interface with only a few very generic definitions requring only three concrete implementations, and two definitions that are essentially reflections of configuration values:
   - `bool SupportsCertificateCheck { get; }` - this is typical MS style design `SupportsXXXXX` is littered all over the place. If it didn't support certificate checks, we would not be using this to automate it. So this may require a concrete definition, but it'll simply be return the value of `true`
   - `Task<bool> IsUsingCertificateAsync(ICertificate cert, CancellationToken cancellationToken);` - A check to see if the target resource already has a certificate, or needs a new one.
   - `Task UpdateAsync(ICertificate cert, CancellationToken cancellationToken);` A method to add/update the certificate on the target resource. Though the name implies updating only, this is where you also define the initial creation.
