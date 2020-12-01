@@ -1,3 +1,5 @@
+### This is an internal Kepler Development note. Others may find it useful, but it's targeted at a specific service and subject.
+
 Here are some pointers on where you can drop extensions to cover more than the Azure serices already covered. Because this function acts as a dependency enabler, you need to understand how the end result works and is set up before you begin to modify it.
 
 # Areas of Focus 
@@ -42,7 +44,10 @@ Here are some pointers on where you can drop extensions to cover more than the A
     return matched.All(x => cert.HostNames.Contains(x.HostName, StringComparison.OrdinalIgnoreCase));
     ```
   - This makes use of an `IAzureAppServiceClient` that is manually defined in the `LetsEncrypt.Logic.Azure` namespace. If not using AutoRest, you'll need to define one for your service as well.
-  - If using AutoRest, create an `Azure[TargetServiceType]Client` as just a simple wrapper around the generated classes. Doing so follows the existing pattern, and will reduce merge conflicts from the upstream repositories.
+  - If using AutoRest, create an `Azure[TargetServiceType]Client` as just a simple wrapper around the generated classes. Doing so follows the existing pattern, and will reduce merge conflicts from the upstream repositories. Do not reference the generated classes directly from the Function.
 
 
-
+# New Service Implementation 
+  
+  
+After reviewing the prior files and ensuring you understand all of it, start by implementing you're `AzureApiGatewayClient` in the same area as the others. Then add an additional switch to the functions. Addd your 'AzApiGateway' definition to the existing switch case in the `RenewalOptionParser.ParseTargetResource` method. 
